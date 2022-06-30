@@ -7,7 +7,7 @@ from bot import extensions
 import json
 from lightbulb.ext import tasks
 
-with open('./stuff/secret') as f:
+with open('./secret') as f:
     _token = f.read().strip()
 
 with open('./config/stuff.json') as e:
