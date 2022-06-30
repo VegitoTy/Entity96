@@ -1,21 +1,25 @@
 import discord
+from discord import app_commands
+import json
 from discord.ext import commands
 
 error_emote = "<:1326_cross:991726586590150737>"
 ephemeral = discord.MessageFlags.ephemeral
 
+with open("./config/stuff.json") as f:
+    bot_config = json.load(f)
+
 class error_handler(commands.Cog):
 
-    def __init__(self, bot):
+    def __init__(self, bot) -> None:
         self.bot = bot
     
     @commands.Cog.listener('on_command_error')
     async def errorhandler(self, ctx:commands.Context, exception):
         sus = False
-        embed = discord.Embed(title=f"{error_emote} Error", color="FF0000")
 
         if isinstance(exception, commands.CommandInvokeError):
-          embed.description = f"> Something went wrong during invocation of command `{ctx.command}`."
+          description = f"> Something went wrong during invocation of command `{ctx.command}`."
           sus = True
 
         if isinstance(exception, commands.CommandNotFound):
@@ -24,34 +28,36 @@ class error_handler(commands.Cog):
         exception = exception.__cause__ or exception
 
         if isinstance(exception, commands.NotOwner):
-            embed.description = f"> You are not the owner of this bot."
+            description = f"> You are not the owner of this bot."
         elif isinstance(exception, commands.CommandOnCooldown):
-            embed.description = f"> This command is on cooldown. Retry in `{exception.retry_after:.2f}` seconds."
+            description = f"> This command is on cooldown. Retry in `{exception.retry_after:.2f}` seconds."
         elif isinstance(exception, commands.errors.CheckFailure):
-            embed.description = f"> You do not have the right permissions to use this command"
+            description = f"> You do not have the right permissions to use this command"
             return
         elif isinstance(exception, commands.errors.MissingRequiredArgument):
             args = ""
             for arg in exception.missing_options:
                 args = args + f"`{arg.name}`, "
             args = args[:-2]
-            embed.description = f"> Missing required argument(s): {args}"
+            description = f"> Missing required argument(s): {args}"
         elif isinstance(exception, TypeError):
-            embed.description = "> Invalid option type"
+            description = "> Invalid option type"
         else:
-            embed.description = f"!! There was a error with this command\n{exception}"
+            description = f"!! There was a error with this command\n{exception}"
             sus = True
 
+        embed = discord.Embed(title=f"{error_emote} Error", description=description, color=0x3498db)
+
         try:
-            await ctx.send(embed=embed, flags=ephemeral, reply=True)
+            await ctx.reply(embed=embed)
         except:
-            try:
-                await ctx.send(embed=embed, reply=True)
-            except:
-                await ctx.send(embed=embed)
+            await ctx.send(embed=embed)
         
         if sus == True:
             raise exception
 
-def setup(bot):
-    bot.add_cog(error_handler(bot))
+async def setup(bot:commands.Bot) -> None:
+    await bot.add_cog(
+        error_handler(bot),
+        guilds = [discord.Object(id = 837616575976177727)]
+    )
