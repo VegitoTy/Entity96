@@ -12,12 +12,11 @@ with open("./secret") as e:
 intents = discord.Intents.default()
 bot = commands.Bot(command_prefix=['.', '. '], status=discord.Status.idle, activity=discord.Activity(type=discord.ActivityType.watching, name='THE Space'), intents=intents)
 
-for filename in os.listdir('./bot/extensions'):
-    if filename.endswith('.py'):
-        bot.load_extension(f'extensions.{filename[:-3]}')
-
 @bot.listen()
 async def on_ready():
+    for filename in os.listdir('./bot/extensions'):
+        if filename.endswith('.py'):
+            await bot.load_extension(f'bot.extensions.{filename[:-3]}')
     channel = await bot.fetch_channel(bot_config["logging"]["startup"])
     await channel.send("Bot has started")
 
