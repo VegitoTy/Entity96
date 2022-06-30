@@ -1,58 +1,41 @@
-import hikari
-import lightbulb
+import discord
 import json
+from discord.ext import commands
 
-plugin = lightbulb.Plugin("utility")
-ephemeral = hikari.MessageFlag.EPHEMERAL
+ephemeral = discord.MessageFlags.ephemeral
 
-with open("./config/stuff.json") as e:
+with open('./config/stuff.json') as e:
     bot_config = json.load(e)
 
-@plugin.command()
-@lightbulb.command("ping", "Check the latency of the bot")
-@lightbulb.implements(lightbulb.PrefixCommand, lightbulb.SlashCommand)
-async def _ping(ctx: lightbulb.Context) -> None:
-    await ctx.respond(f"Latency: `{ctx.bot.heartbeat_latency*1000:.2f} ms`", reply=True)
-
-@plugin.command()
-@lightbulb.option("member", "the member to show", type=hikari.Member, required=False, default=None)
-@lightbulb.command("avatar", "shows the members display avatar", aliases=["av", "avatar"])
-@lightbulb.implements(lightbulb.PrefixCommand)
-async def _av(ctx: lightbulb.Context) -> None:
-    member = ctx.options.member
-    if member == None:
-        member = ctx.event.message.member
+class utility(commands.Cog):
     
-    embed = hikari.Embed(color=bot_config['color']['default'], title=f"{member}'s avatar")
-    embed.set_image(member.display_avatar_url)
-    await ctx.respond(embed=embed, reply=True)
+    def __init__(self, bot):
+        self.bot = bot
 
-@plugin.command()
-@lightbulb.option("text", "the content of the embed", required=True, modifier=lightbulb.commands.base.OptionModifier(3))
-@lightbulb.option("channel", "the channel to send the embed to", type=hikari.GuildChannel, default=None, required=False)
-@lightbulb.command("embed", "Creates an embed in the specified channel, separate the title from the description with |")
-@lightbulb.implements(lightbulb.PrefixCommand)
-async def _embed(ctx : lightbulb.Context) -> None:
-    channel = ctx.options.channel
-    text = ctx.options.text
-    color = ctx.options.color
-    
-    if not channel:
-        cid = ctx.event.message.channel_id
-    else:
-        cid = channel.id
-    
-    try:
-        title, description = text.split("|", 1)
-        embed = hikari.Embed(title=title, description=description, color=bot_config['color']['default'])
-        await ctx.app.rest.create_message(cid, embed=embed)
-        await ctx.event.message.add_reaction("✅")
-    except:
-        await ctx.event.message.add_reaction("❌")
-    
+    @commands.command(name="ping", aliases='Ping', description='Shows the latency of the bot')
+    async def _ping(self, ctx):
+        await ctx.send(f'Latency :- `{round(self.bot.latency * 1000)} ms`')
 
-def load(bot):
-    bot.add_plugin(plugin)
+    @commands.command(name='av', description='Shows the avatar of someone', aliases='avatar')
+    async def _av(self, ctx, member:discord.Member=None):
+        if member == None:
+            member = ctx.author
+    
+        embed = discord.Embed(color=bot_config['color']['default'], title=f"{member}'s avatar")
+        embed.set_image(member.display_avatar_url)
+        await ctx.send(embed=embed, reply=True)
 
-def unload(bot):
-    bot.remove_plugin(plugin)
+    @commands.command(aliases='Embed', name='embed', description='Creates an embed, separate the title from the description with |')
+    async def _embed(self, ctx, text):
+        channel = ctx.channel
+
+        try:
+            title, description = text.split("|", 1)
+            embed = discord.Embed(title=title, description=description, color=bot_config['color']['default'])
+            await channel.send(embed=embed)
+            await ctx.message.add_reaction("✅")
+        except:
+            await ctx.message.add_reaction("❌")
+
+def setup(bot):
+    bot.add_cog(utility(bot))
