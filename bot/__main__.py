@@ -10,16 +10,11 @@ with open("./secret") as e:
     TOKEN = e.read().strip()
 
 intents = discord.Intents.default()
-bot = commands.Bot(
-    command_prefix=['.', '. '],
-    status=discord.Status.idle,
-    activity=discord.Activity(type=discord.ActivityType.watching, name='THE Space'),
-    intents=intents
-)
+bot = commands.Bot(command_prefix=['.', '. '], status=discord.Status.idle, activity=discord.Activity(type=discord.ActivityType.watching, name='THE Space'), intents=intents)
 
-for filename in os.listdir('./extensions'):
-  if filename.endswith('.py'):
-    bot.load_extension(f'extensions.{filename[:-3]}')
+for filename in os.listdir('./bot/extensions'):
+    if filename.endswith('.py'):
+        bot.load_extension(f'extensions.{filename[:-3]}')
 
 @bot.listen()
 async def on_ready():
