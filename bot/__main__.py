@@ -1,5 +1,4 @@
 import discord
-import hikari
 from discord.ext import commands
 import os
 import json
