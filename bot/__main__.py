@@ -11,13 +11,13 @@ with open("./secret") as e:
 
 intents = discord.Intents.default()
 bot = commands.Bot(
-    command_prefix=(bot_config["bot"]["prefix"]),
+    command_prefix=['.', '. '],
     status=discord.Status.idle,
     activity=discord.Activity(type=discord.ActivityType.watching, name='THE Space'),
     intents=intents
 )
 
-for filename in os.listdir('./bot/extensions'):
+for filename in os.listdir('./extensions'):
   if filename.endswith('.py'):
     bot.load_extension(f'extensions.{filename[:-3]}')
 
