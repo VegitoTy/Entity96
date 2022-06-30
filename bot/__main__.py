@@ -23,6 +23,9 @@ for filename in os.listdir('./bot/extensions'):
 
 @bot.listen()
 async def on_ready():
+    for filename in os.listdir('./bot/extensions'):
+        if filename.endswith('.py'):
+            await bot.load_extension(f'modules.{filename[:-3]}')
     channel = await bot.fetch_channel(bot_config["logging"]["startup"])
     await channel.send("Bot has started")
 
