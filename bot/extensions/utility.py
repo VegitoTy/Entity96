@@ -30,8 +30,7 @@ async def _av(ctx: lightbulb.Context) -> None:
 @plugin.command()
 @lightbulb.option("text", "the content of the embed", required=True, modifier=lightbulb.commands.base.OptionModifier(3))
 @lightbulb.option("channel", "the channel to send the embed to", type=hikari.GuildChannel, default=None, required=False)
-@lightbulb.option("color", "color of the embed (without #)", required=False, default=None)
-@lightbulb.command("embed", "Creates an embed with the specified color in the specified channel, separate the title from the description with |")
+@lightbulb.command("embed", "Creates an embed in the specified channel, separate the title from the description with |")
 @lightbulb.implements(lightbulb.PrefixCommand)
 async def _embed(ctx : lightbulb.Context) -> None:
     channel = ctx.options.channel
@@ -43,14 +42,9 @@ async def _embed(ctx : lightbulb.Context) -> None:
     else:
         cid = channel.id
     
-    if not color:
-        colorcode = bot_config['color']['default']
-    else:
-        colorcode = color
-    
     try:
         title, description = text.split("|", 1)
-        embed = hikari.Embed(title=title, description=description, color=colorcode)
+        embed = hikari.Embed(title=title, description=description, color=bot_config['color']['default'])
         await ctx.app.rest.create_message(cid, embed=embed)
         await ctx.event.message.add_reaction("✅")
     except:
