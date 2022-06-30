@@ -1,5 +1,6 @@
 import discord
 import json
+from discord.utils import get
 from discord.ext import commands
 
 ephemeral = discord.MessageFlags.ephemeral
@@ -11,6 +12,15 @@ class utility(commands.Cog):
     
     def __init__(self, bot):
         self.bot = bot
+
+    def afk_perms_check(self, ctx):
+        role = get(ctx.guild.roles, name='Senior Moderator')
+        role2 = get(ctx.guild.roles, name='Bots')
+        roles = [role, role2]
+        for allowed_role in roles:
+            if allowed_role in ctx.author.roles:
+                return True
+        return False
 
     @commands.command(name="ping", aliases=['Ping'], description='Shows the latency of the bot')
     async def _ping(self, ctx):
@@ -28,7 +38,6 @@ class utility(commands.Cog):
     @commands.command(aliases=['Embed'], name='embed', description='Creates an embed, separate the title from the description with |')
     async def _embed(self, ctx, text):
         channel = ctx.channel
-
         try:
             title, description = text.split("|", 1)
             embed = discord.Embed(title=title, description=description, color=0x3498db)
@@ -37,6 +46,11 @@ class utility(commands.Cog):
         except Exception as e:
             await ctx.message.add_reaction("❌")
             raise e
+            
+    @commands.command(name='afk', aliases='Afk', description='Set Your Afk')
+    @commands.check_any(afk_perms_check, commands.has_permissions(administrator=True), commands.is_owner())
+    async def _afk(self, ctx, reason):
+        await ctx.reply('test')
 
 async def setup(bot:commands.Bot) -> None:
     await bot.add_cog(
